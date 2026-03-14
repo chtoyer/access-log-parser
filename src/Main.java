@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -27,6 +28,15 @@ public class Main {
                     stats.addEntry(entry);
                 }
                 System.out.println("Средний объем трафика за час: " + stats.getTrafficRate());
+                System.out.println("Список существующих страниц сайта:");
+                for (String page : stats.getPages()) {
+                    System.out.println("- " + page);
+                }
+                System.out.println("Статистика операционных систем (доли):");
+                Map<String, Double> osStatistics = stats.getOsStats();
+                for (Map.Entry<String, Double> entry : osStatistics.entrySet()) {
+                    System.out.printf("- %s: %.4f%n", entry.getKey(), entry.getValue());
+                }
             } catch (Exception ex) {
                 System.out.println("Ошибка: " + ex.getMessage());
                 break;
