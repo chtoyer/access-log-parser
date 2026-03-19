@@ -53,6 +53,17 @@ public class Main {
                 System.out.println("Среднее кол-во ошибок в час: " + stats.getAvgErrorsPerHour());
                 System.out.println("Среднее кол-во посещений на одного пользователя: " + stats.getAvgVisitsPerUser());
 
+                System.out.println("Пиковая посещаемость сайта (в секунду): " + stats.getMaxVisitsPerSecond());
+                System.out.println("Максимальная посещаемость одним пользователем: " + stats.getMaxVisitsPerUser());
+                System.out.println("\nСписок сайтов-рефереров (домены):");
+                if (stats.getRefererDomains().isEmpty()) {
+                    System.out.println("- Ссылающиеся сайты не найдены");
+                } else {
+                    for (String domain : stats.getRefererDomains()) {
+                        System.out.println("- " + domain);
+                    }
+                }
+
             } catch (Exception ex) {
                 System.out.println("Ошибка: " + ex.getMessage());
                 ex.printStackTrace();

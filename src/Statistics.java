@@ -3,6 +3,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.*;
 
 public class Statistics {
     private long totalTraffic;
@@ -15,6 +16,9 @@ public class Statistics {
     private int userVisits = 0;
     private int errorCount = 0;
     private HashSet<String> uniqueUserIps = new HashSet<>();
+    private HashMap<LocalDateTime, Integer> visitsPerSecond = new HashMap<>();
+    private HashSet<String> refererDomains = new HashSet<>();
+    private HashMap<String, Integer> userVisitCounts = new HashMap<>();
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -44,10 +48,50 @@ public class Statistics {
         if (!entry.getUserAgent().isBot()) {
             userVisits++;
             uniqueUserIps.add(entry.getIpAddress());
+
+            visitsPerSecond.put(entryTime, visitsPerSecond.getOrDefault(entryTime, 0) + 1);
+
+            userVisitCounts.put(entry.getIpAddress(), userVisitCounts.getOrDefault(entry.getIpAddress(), 0) + 1);
         }
+
+        String referer = entry.getReferer();
+        if (referer != null && !referer.equals("-")) {
+            String domain = extractDomain(referer);
+            if (domain != null) refererDomains.add(domain);
+        }
+
         if (entry.getResponseCode() >= 400 && entry.getResponseCode() < 600) {
             errorCount++;
         }
+    }
+
+    private String extractDomain(String url) {
+        try {
+            String domain = url.replaceFirst("https?://", "");
+            int slashIndex = domain.indexOf('/');
+            if (slashIndex != -1) domain = domain.substring(0, slashIndex);
+            return domain;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public int getMaxVisitsPerSecond() {
+        return visitsPerSecond.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    public HashSet<String> getRefererDomains() {
+        return refererDomains;
+    }
+
+    public int getMaxVisitsPerUser() {
+        return userVisitCounts.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
     }
 
     private double getHoursDiff() {
