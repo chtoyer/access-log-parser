@@ -12,6 +12,9 @@ public class Statistics {
     private HashSet<String> invalidPages = new HashSet<>();
     private HashMap<String, Integer> osCounts = new HashMap<>();
     private HashMap<String, Integer> browserCounts = new HashMap<>();
+    private int userVisits = 0;
+    private int errorCount = 0;
+    private HashSet<String> uniqueUserIps = new HashSet<>();
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -37,6 +40,33 @@ public class Statistics {
 
         String browser = entry.getUserAgent().getBrowser();
         browserCounts.put(browser, browserCounts.getOrDefault(browser, 0) + 1);
+
+        if (!entry.getUserAgent().isBot()) {
+            userVisits++;
+            uniqueUserIps.add(entry.getIpAddress());
+        }
+        if (entry.getResponseCode() >= 400 && entry.getResponseCode() < 600) {
+            errorCount++;
+        }
+    }
+
+    private double getHoursDiff() {
+        if (minTime == null || maxTime == null) return 0;
+        long hours = ChronoUnit.HOURS.between(minTime, maxTime);
+        return hours == 0 ? 1.0 : (double) hours;
+    }
+
+    public double getAvgUserVisitsPerHour() {
+        return userVisits / getHoursDiff();
+    }
+
+    public double getAvgErrorsPerHour() {
+        return errorCount / getHoursDiff();
+    }
+
+    public double getAvgVisitsPerUser() {
+        if (uniqueUserIps.isEmpty()) return 0;
+        return (double) userVisits / uniqueUserIps.size();
     }
 
     public HashSet<String> getPages() {

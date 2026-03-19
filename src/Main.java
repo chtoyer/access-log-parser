@@ -48,6 +48,11 @@ public class Main {
                 for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
                     System.out.printf("- %s: %.4f%n", entry.getKey(), entry.getValue());
                 }
+
+                System.out.println("Среднее кол-во посещений (люди) в час: " + stats.getAvgUserVisitsPerHour());
+                System.out.println("Среднее кол-во ошибок в час: " + stats.getAvgErrorsPerHour());
+                System.out.println("Среднее кол-во посещений на одного пользователя: " + stats.getAvgVisitsPerUser());
+
             } catch (Exception ex) {
                 System.out.println("Ошибка: " + ex.getMessage());
                 ex.printStackTrace();
