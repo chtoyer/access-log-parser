@@ -27,18 +27,30 @@ public class Main {
                     LogEntry entry = new LogEntry(line);
                     stats.addEntry(entry);
                 }
-                System.out.println("Средний объем трафика за час: " + stats.getTrafficRate());
-                System.out.println("Список существующих страниц сайта:");
-                for (String page : stats.getPages()) {
-                    System.out.println("- " + page);
+                System.out.println("\nСписок несуществующих страниц (404):");
+                if (stats.getInvalidPages().isEmpty()) {
+                    System.out.println("- Страниц с ошибкой 404 не найдено");
+                } else {
+                    for (String page : stats.getInvalidPages()) {
+                        System.out.println("- " + page);
+                    }
                 }
+
+                System.out.println("Средний объем трафика за час: " + stats.getTrafficRate());
                 System.out.println("Статистика операционных систем (доли):");
                 Map<String, Double> osStatistics = stats.getOsStats();
                 for (Map.Entry<String, Double> entry : osStatistics.entrySet()) {
                     System.out.printf("- %s: %.4f%n", entry.getKey(), entry.getValue());
                 }
+
+                System.out.println("\nСтатистика браузеров (доли):");
+                Map<String, Double> browserStats = stats.getBrowserStats();
+                for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
+                    System.out.printf("- %s: %.4f%n", entry.getKey(), entry.getValue());
+                }
             } catch (Exception ex) {
                 System.out.println("Ошибка: " + ex.getMessage());
+                ex.printStackTrace();
                 break;
             }
         }

@@ -9,7 +9,9 @@ public class Statistics {
     private LocalDateTime minTime;
     private LocalDateTime maxTime;
     private HashSet<String> pages = new HashSet<>();
+    private HashSet<String> invalidPages = new HashSet<>();
     private HashMap<String, Integer> osCounts = new HashMap<>();
+    private HashMap<String, Integer> browserCounts = new HashMap<>();
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -26,28 +28,48 @@ public class Statistics {
         if (entry.getResponseCode() == 200) {
             pages.add(entry.getPath());
         }
-        String os = entry.getUserAgent().getOsType();
-        if (osCounts.containsKey(os)) {
-            osCounts.put(os, osCounts.get(os) + 1);
-        } else {
-            osCounts.put(os, 1);
+        if (entry.getResponseCode() == 404) {
+            invalidPages.add(entry.getPath());
         }
+
+        String os = entry.getUserAgent().getOsType();
+        osCounts.put(os, osCounts.getOrDefault(os, 0) + 1);
+
+        String browser = entry.getUserAgent().getBrowser();
+        browserCounts.put(browser, browserCounts.getOrDefault(browser, 0) + 1);
     }
+
     public HashSet<String> getPages() {
         return pages;
     }
-    public HashMap<String, Double> getOsStats() {
-        HashMap<String, Double> osStats = new HashMap<>();
-        int totalOs = 0;
 
-        for (int count : osCounts.values()) {
-            totalOs += count;
-        }
-        for (Map.Entry<String, Integer> entry : osCounts.entrySet()) {
-            osStats.put(entry.getKey(), (double) entry.getValue() / totalOs);
-        }
-        return osStats;
+    public HashSet<String> getInvalidPages() {
+        return invalidPages;
     }
+
+    public HashMap<String, Double> getOsStats() {
+        return calculateProportions(osCounts);
+    }
+
+    public HashMap<String, Double> getBrowserStats() {
+        return calculateProportions(browserCounts);
+    }
+
+    private HashMap<String, Double> calculateProportions(HashMap<String, Integer> countsMap) {
+        HashMap<String, Double> proportions = new HashMap<>();
+        int total = 0;
+        for (int count : countsMap.values()) {
+            total += count;
+        }
+
+        if (total > 0) {
+            for (Map.Entry<String, Integer> entry : countsMap.entrySet()) {
+                proportions.put(entry.getKey(), (double) entry.getValue() / total);
+            }
+        }
+        return proportions;
+    }
+
     public double getTrafficRate() {
         if (minTime == null || maxTime == null) return 0;
         long hours = ChronoUnit.HOURS.between(minTime, maxTime);
